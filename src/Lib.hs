@@ -15,7 +15,7 @@ import Servant
 data CalcResponse = CalcResponse {
   operator :: String,
   arguments :: [Double],
-  result :: Double,
+  result :: Maybe Double,
   error :: Maybe String
 }
 
@@ -46,19 +46,24 @@ server = add
     :<|> pow
 
 add :: Double -> Double -> Handler CalcResponse
-add x y = return (CalcResponse "add" [x, y] (x + y) Nothing)
+add x y = return (CalcResponse "add" [x, y] (Just (x + y)) Nothing)
 
 sub :: Double -> Double -> Handler CalcResponse
-sub x y = return (CalcResponse "sub" [x, y] (x - y) Nothing)
+sub x y = return (CalcResponse "sub" [x, y] (Just (x - y)) Nothing)
 
 mul :: Double -> Double -> Handler CalcResponse
-mul x y = return (CalcResponse "mul" [x, y] (x * y) Nothing)
+mul x y = return (CalcResponse "mul" [x, y] (Just (x * y)) Nothing)
 
 div :: Double -> Double -> Handler CalcResponse
-div x y = return (CalcResponse "div" [x, y] (x / y) Nothing)
+div x 0.0 = return (CalcResponse "div" [x, 0.0] Nothing (Just "Division by zero"))
+div x y = return (CalcResponse "div" [x, y] (Just (x / y)) Nothing)
 
 sqrt :: Double -> Handler CalcResponse
-sqrt x = return (CalcResponse "sqrt" [x] (Prelude.sqrt x) Nothing)
+sqrt x
+  | x < 0 = return (CalcResponse "sqrt" [x] Nothing (Just "Square root of negative number is a complex number"))
+  | otherwise = return (CalcResponse "sqrt" [x] (Just (Prelude.sqrt x)) Nothing)
 
 pow :: Double -> Int -> Handler CalcResponse
-pow x n = return (CalcResponse "pow" [x, fromIntegral n] (x ** fromIntegral n) Nothing)
+pow x n
+  | x == 0 && n < 0 = return (CalcResponse "pow" [x, fromIntegral n] Nothing (Just "Negative power of zero leads to division by zero"))
+  | otherwise = return (CalcResponse "pow" [x, fromIntegral n] (Just (x ** fromIntegral n)) Nothing)
