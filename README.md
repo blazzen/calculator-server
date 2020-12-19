@@ -9,6 +9,10 @@ Requires [The Haskell Tool Stack](https://docs.haskellstack.org/en/stable/README
     stack build
     stack exec calculator-server-exe
 
+## Testing
+
+    stack test
+
 ## Queries
 - GET /add/\<x>/\<y>
 - GET /sub/\<x>/\<y>
